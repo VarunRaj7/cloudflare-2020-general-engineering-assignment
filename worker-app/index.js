@@ -1,5 +1,10 @@
 const Router = require('./router')
 
+const userName = 'Varun'
+
+const userImage =
+    'https://general-vr.s3.us-east-2.amazonaws.com/formal_pic2.jpg'
+
 const links = [
     { name: 'Youtube', url: 'https://www.youtube.com/' },
     {
@@ -12,6 +17,14 @@ const links = [
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event.request))
 })
+
+function linksHandler(request) {
+    const init = {
+        headers: { 'content-type': 'application/json' },
+    }
+    const body = JSON.stringify(links)
+    return new Response(body, init)
+}
 
 class LinksTransformer {
     constructor(links) {
@@ -27,12 +40,32 @@ class LinksTransformer {
     }
 }
 
-function linksHandler(request) {
-    const init = {
-        headers: { 'content-type': 'application/json' },
+class RemoveAttrTransformer {
+    constructor(attr) {
+        this.attr = attr
     }
-    const body = JSON.stringify(links)
-    return new Response(body, init)
+    async element(element) {
+        element.removeAttribute(this.attr)
+    }
+}
+
+class SetContentTransformer {
+    constructor(content) {
+        this.content = content
+    }
+    async element(element) {
+        element.setInnerContent(this.content)
+    }
+}
+
+class SetAttrTransformer {
+    constructor(attr, value) {
+        this.attr = attr
+        this.value = value
+    }
+    async element(element) {
+        element.setAttribute(this.attr, this.value)
+    }
 }
 
 async function nonLinkshandler(request) {
@@ -44,6 +77,9 @@ async function nonLinkshandler(request) {
     )
     return new HTMLRewriter()
         .on('div#links', new LinksTransformer(links))
+        .on('div#profile', new RemoveAttrTransformer('style'))
+        .on('h1#name', new SetContentTransformer(userName))
+        .on('img#avatar', new SetAttrTransformer('src', userImage))
         .transform(body)
 }
 
