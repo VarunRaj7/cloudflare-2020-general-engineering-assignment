@@ -2,6 +2,8 @@ const Router = require('./router')
 
 const userName = 'Varun'
 
+const title = 'CloudFlare VarunRR'
+
 const userImage =
     'https://general-vr.s3.us-east-2.amazonaws.com/formal_pic2.jpg'
 
@@ -116,6 +118,8 @@ async function nonLinkshandler(request) {
         .on('img#avatar', new SetAttrTransformer('src', userImage))
         .on('div#social', new RemoveAttrTransformer('style'))
         .on('div#social', new SocialLinksTransformer(socialLinks))
+        .on('title', new SetContentTransformer(title))
+        .on('body', new SetAttrTransformer('class', 'bg-teal-700'))
         .transform(body)
 }
 
